@@ -1,0 +1,16 @@
+{
+  "name": "bioid-congreso",
+  "version": "1.0.0",
+  "description": "Estructura root plana de autenticación biométrica y por voz para el Congreso",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "biometric",
+    "voice",
+    "auth"
+  ],
+  "author": "",
+  "license": "ISC"
+}

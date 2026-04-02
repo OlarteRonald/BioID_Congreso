@@ -1,0 +1,321 @@
+:root {
+    --color-black: #000000;
+    --color-white: #FFFFFF;
+    --color-gold: #B59454;
+    --color-gold-hover: #c5a462;
+    --color-gray: #1C1C1E;
+    
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    --transition-fast: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--color-black);
+    color: var(--color-white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Utils */
+.mt-2 { margin-top: 2rem; }
+.full-page { height: 100vh; justify-content: center; margin: 0 auto; }
+
+/* Animations */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s var(--transition-smooth) forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+.logo-congreso {
+    height: 48px;
+    object-fit: contain;
+    transition: transform var(--transition-smooth), opacity var(--transition-fast);
+}
+
+.logo-congreso:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.nav-right {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.7rem 1.8rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-gold);
+    border: 1.5px solid var(--color-gold);
+}
+
+.btn-outline:hover {
+    background: rgba(181, 148, 84, 0.1);
+    box-shadow: 0 4px 15px rgba(181, 148, 84, 0.2);
+}
+
+.btn-solid {
+    background: var(--color-gold);
+    color: var(--color-black);
+    border: 1.5px solid var(--color-gold);
+    font-weight: 600;
+}
+
+.btn-solid:hover {
+    background: var(--color-gold-hover);
+    border-color: var(--color-gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(181, 148, 84, 0.25);
+}
+
+/* Hero Section */
+.hero-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 2rem;
+}
+
+.center-content {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo-bioid {
+    width: 250px;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 30px rgba(181, 148, 84, 0.15));
+    transition: transform var(--transition-smooth), filter var(--transition-smooth);
+}
+
+.logo-bioid:hover {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 40px rgba(181, 148, 84, 0.25));
+}
+
+.hero-title {
+    font-size: 2.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: -0.8px;
+    background: linear-gradient(135deg, var(--color-white) 0%, rgba(255,255,255,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+    max-width: 450px;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--color-gray);
+    border: 1px solid rgba(181, 148, 84, 0.3);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px; right: 20px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--color-gold);
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Forms */
+.input-group {
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #bbb;
+    margin-bottom: 0.4rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: #0A0A0C;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color var(--transition-fast);
+    outline: none;
+}
+
+.input-group input:focus {
+    border-color: var(--color-gold);
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.btn-icon {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.btn-icon:hover {
+    color: var(--color-white);
+}
+
+.w-full {
+    width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Camera */
+.camera-container {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #333;
+}
+
+.camera-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Floating Mic Button */
+.floating-mic-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--color-gold);
+    color: var(--color-black);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(181, 148, 84, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+    z-index: 1000;
+}
+
+.floating-mic-btn:hover {
+    transform: scale(1.1);
+    background: var(--color-gold-hover);
+}
+
+.floating-mic-btn.listening {
+    animation: pulseMic 1.5s infinite;
+    background: #e74c3c;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+}
+
+@keyframes pulseMic {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}

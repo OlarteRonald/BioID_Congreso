@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioID Congreso</title>
+    <!-- Google Fonts for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- TFJS y Teachable Machine Audio -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+</head>
+<body>
+    <header class="navbar fade-in">
+        <div class="nav-left">
+            <a href="index.html">
+                <img src="https://res.cloudinary.com/denwpycde/image/upload/v1775147645/Logo_Congreso_de_Colombia_q2f2ux.png" alt="Logo Congreso" class="logo-congreso">
+            </a>
+        </div>
+        <div class="nav-right">
+            <button class="btn btn-outline" id="btn-register">Registrarse</button>
+            <button class="btn btn-solid" id="btn-login">Iniciar sesión</button>
+        </div>
+    </header>
+
+    <main class="hero-section fade-in delay-1">
+        <div class="center-content">
+            <img src="https://res.cloudinary.com/denwpycde/image/upload/v1775147247/ChatGPT_Image_2_abr_2026_10_57_28_bqnqms.png" alt="BioID Congreso" class="logo-bioid">
+            <h1 class="hero-title">Identidad Segura e Inteligente</h1>
+            <p class="hero-subtitle">Plataforma de autenticación biométrica y por voz para el Congreso.</p>
+        </div>
+    </main>
+
+    <div id="modal-container">
+        <!-- Registro Modal -->
+        <div id="register-modal" class="modal-overlay hidden">
+            <div class="modal-content fade-in">
+                <button class="modal-close" id="close-register">&times;</button>
+                <h2 class="modal-title">Registro</h2>
+                <div class="modal-body" id="register-step-1">
+                    <form id="register-form">
+                        <div class="input-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" id="reg-nombre" required placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="input-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" id="reg-correo" required placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Usuario</label>
+                            <input type="text" id="reg-usuario" required placeholder="Nombre de usuario">
+                        </div>
+                        <div class="input-group">
+                            <label>Contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="reg-password" required placeholder="••••••••">
+                                <button type="button" class="btn-icon toggle-password" data-target="reg-password">👁</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Confirmar Contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="reg-password-confirm" required placeholder="••••••••">
+                                <button type="button" class="btn-icon toggle-password" data-target="reg-password-confirm">👁</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-solid w-full mt-2">Siguiente</button>
+                    </form>
+                </div>
+
+                <div class="modal-body hidden" id="register-step-2">
+                    <h3 style="margin-bottom: 1rem; color: var(--color-white)">Captura Biométrica</h3>
+                    <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;">Por favor ubique su rostro frente a la cámara.</p>
+                    <div class="camera-container">
+                        <video id="camera-feed" autoplay playsinline></video>
+                        <canvas id="camera-canvas" style="display:none;"></canvas>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top: 1rem;">
+                        <button id="btn-capture" class="btn btn-outline w-full">Capturar Rostro</button>
+                        <button id="btn-finish-register" class="btn btn-solid w-full hidden">Finalizar y Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal-overlay hidden">
+            <div class="modal-content fade-in">
+                <button class="modal-close" id="close-login">&times;</button>
+                <h2 class="modal-title">Iniciar Sesión</h2>
+                
+                <!-- Paso 1: Credenciales -->
+                <div class="modal-body" id="login-step-1">
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label>Usuario</label>
+                            <input type="text" id="log-usuario" required placeholder="Nombre de usuario">
+                        </div>
+                        <div class="input-group">
+                            <label>Contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="log-password" required placeholder="••••••••">
+                                <button type="button" class="btn-icon toggle-password" data-target="log-password">👁</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-solid w-full mt-2">Verificar Acceso</button>
+                    </form>
+                </div>
+
+                <!-- Paso 2: Biometría Facial -->
+                <div class="modal-body hidden" id="login-step-2">
+                    <h3 style="margin-bottom: 1rem; color: var(--color-white)">Validación Facial</h3>
+                    <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;">Comparando rostro con la base de datos...</p>
+                    <div class="camera-container">
+                        <video id="login-camera-feed" autoplay playsinline></video>
+                        <canvas id="login-camera-canvas" style="display:none;"></canvas>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top: 1rem;">
+                        <button id="btn-login-capture" class="btn btn-outline w-full">Verificar Rostro</button>
+                        <button id="btn-login-next" class="btn btn-solid w-full hidden">Continuar</button>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Identidad de Voz (Teachable Machine) -->
+                <div class="modal-body hidden" id="login-step-3">
+                    <h3 style="margin-bottom: 1rem; color: var(--color-white)">Verificación por Voz</h3>
+                    <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;" id="voice-status">Diga la palabra de seguridad (Clase: "bolivar") para autorizar el acceso.</p>
+                    <div style="text-align:center; padding: 20px 0;">
+                        <div style="font-size: 3rem;" class="pulse-animation">🎙️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VAPI Widget -->
+    <vapi-widget
+      public-key="e77c2e30-f591-438a-9e56-9e6da4489122"
+      assistant-id="acfd95ec-1d33-4dad-8daf-b3798a69b2d9"
+      mode="voice"
+      theme="dark"
+      base-bg-color="#000000"
+      accent-color="#B59454"
+      cta-button-color="#000000"
+      cta-button-text-color="#ffffff"
+      border-radius="large"
+      size="full"
+      position="bottom-right"
+      title="HABLA NOVA"
+      start-button-text="Iniciar"
+      end-button-text="Terminar llamada"
+      chat-first-message="Hola soy Manuela, ¿en qué puedo ayudarte hoy?"
+      chat-placeholder="Escribe tu mensaje..."
+      voice-show-transcript="true"
+      consent-required="true"
+      consent-title="Términos y condiciones"
+      consent-content="Al hacer clic en 'Acepto', doy consentimiento para uso de datos."
+      consent-storage-key="vapi_widget_consent"
+    ></vapi-widget>
+    <script src="https://unpkg.com/@vapi-ai/client-sdk-react/dist/embed/widget.umd.js" async></script>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

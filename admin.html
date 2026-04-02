@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - BioID</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar fade-in">
+        <div class="nav-left">
+            <p class="hero-subtitle" style="font-size:1.1rem; color:var(--color-gold);">Consola de Administración</p>
+        </div>
+        <div class="nav-right">
+            <button class="btn btn-outline" id="btn-admin-logout" onclick="window.location.href='index.html'">Salir</button>
+        </div>
+    </header>
+
+    <main class="fade-in delay-1" style="padding: 100px 4rem 2rem; max-width: 1400px; margin: 0 auto; width: 100%;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 2.2rem; font-weight:600; margin-bottom: 0.5rem; color:#fff;">Centro de Operaciones</h1>
+                <p class="hero-subtitle">Monitoreo en tiempo real de identidad y accesos.</p>
+            </div>
+            <div style="text-align: right; background: rgba(231, 76, 60, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(231, 76, 60, 0.3);">
+                <p style="font-size: 0.85rem; color:#e74c3c; font-weight:600; margin-bottom:5px;">ACTIVO EN TIEMPO REAL 🔴</p>
+                <div id="live-users" style="font-size: 1.8rem; font-weight: 700; color: var(--color-white)">Conectando...</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            
+            <!-- REGISTROS Y REPORTES -->
+            <section style="background:#111; padding:1.5rem; border-radius:10px; border: 1px solid #222;">
+                <h3 style="margin-bottom: 1rem; color: var(--color-gold); border-bottom:1px solid #333; padding-bottom:10px;">📄 Registros y Reportes</h3>
+                <ul id="registros-list" style="list-style:none; color:#aaa; font-size:0.95rem; margin-bottom: 1rem; min-height:100px;">
+                    <li style="padding:10px 0; border-bottom:1px solid #222;">Cargando registros...</li>
+                </ul>
+                <button class="btn btn-outline mt-2 w-full" style="font-size:0.85rem; padding:0.6rem;" onclick="alert('Generando Reporte PDF. Un momento.')">Descargar Reporte (PDF)</button>
+            </section>
+
+            <!-- SESIONES Y PATRONES -->
+            <section style="background:#111; padding:1.5rem; border-radius:10px; border: 1px solid #222;">
+                <h3 style="margin-bottom: 1rem; color: var(--color-gold); border-bottom:1px solid #333; padding-bottom:10px;">📈 Sesiones y Patrones</h3>
+                <div style="margin-bottom: 1rem;">
+                    <p style="font-size:0.85rem; color:#888; margin-bottom:8px;">Patrón de Acceso Biométrico (Últimos 7 días)</p>
+                    <div style="display:flex; gap:6px; height: 80px; align-items:flex-end; border-bottom: 1px solid #333; padding-bottom:5px;">
+                        <div style="background:var(--color-gold); width:14%; height:40%; border-radius:3px 3px 0 0; opacity: 0.7;"></div>
+                        <div style="background:var(--color-gold); width:14%; height:60%; border-radius:3px 3px 0 0; opacity: 0.8;"></div>
+                        <div style="background:var(--color-gold); width:14%; height:50%; border-radius:3px 3px 0 0; opacity: 0.7;"></div>
+                        <div style="background:var(--color-gold); width:14%; height:100%; border-radius:3px 3px 0 0;"></div>
+                        <div style="background:var(--color-gold); width:14%; height:70%; border-radius:3px 3px 0 0; opacity: 0.9;"></div>
+                        <div style="background:var(--color-gold); width:14%; height:30%; border-radius:3px 3px 0 0; opacity: 0.5;"></div>
+                        <div style="background:var(--color-white); width:14%; height:80%; border-radius:3px 3px 0 0; box-shadow: 0 0 15px rgba(255,255,255,0.4);"></div>
+                    </div>
+                </div>
+                <ul id="sesiones-list" style="list-style:none; color:#aaa; font-size:0.95rem;">
+                    <li style="padding:8px 0; border-bottom:1px solid #222;">Evaluando...</li>
+                </ul>
+            </section>
+            
+            <!-- METRICAS Y ALERTAS -->
+            <section style="background:#111; padding:1.5rem; border-radius:10px; border: 1px solid #222;">
+                <h3 style="margin-bottom: 1rem; color: var(--color-gold); border-bottom:1px solid #333; padding-bottom:10px;">⚠️ Métricas y Alertas</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+                    <div style="background:#1c1c1e; padding:15px 10px; border-radius:8px; text-align:center;">
+                        <p style="font-size:0.8rem; color:#888;">Puntualidad Global</p>
+                        <strong style="color:#2ecc71; font-size:1.6rem;">94.2%</strong>
+                    </div>
+                    <div style="background:#1c1c1e; padding:15px 10px; border-radius:8px; text-align:center;">
+                        <p style="font-size:0.8rem; color:#888;">Intentos Fallidos</p>
+                        <strong style="color:#e74c3c; font-size:1.6rem;" id="intentos-count">3</strong>
+                    </div>
+                </div>
+
+                <div id="alertas-container" style="background:rgba(231, 76, 60, 0.1); border:1px solid rgba(231, 76, 60, 0.5); border-radius:8px; padding:15px;">
+                    <p style="color:#e74c3c; font-size:0.9rem; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+                        <span>❗</span> ALERTA DE SEGURIDAD
+                    </p>
+                    <p style="color:#ccc; font-size:0.85rem; line-height:1.4;">Detección de intentos fallidos consecutivos en validación de voz. Origen de IP bajo revisión activa.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- VAPI Widget -->
+    <vapi-widget
+      public-key="e77c2e30-f591-438a-9e56-9e6da4489122"
+      assistant-id="acfd95ec-1d33-4dad-8daf-b3798a69b2d9"
+      mode="voice"
+      theme="dark"
+      base-bg-color="#000000"
+      accent-color="#B59454"
+      cta-button-color="#000000"
+      cta-button-text-color="#ffffff"
+      border-radius="large"
+      size="full"
+      position="bottom-right"
+      title="HABLA NOVA"
+      start-button-text="Iniciar"
+      end-button-text="Terminar llamada"
+      chat-first-message="Hola soy Manuela, ¿en qué puedo ayudarte hoy?"
+      chat-placeholder="Escribe tu mensaje..."
+      voice-show-transcript="true"
+      consent-required="true"
+      consent-title="Términos y condiciones"
+      consent-content="Al hacer clic en 'Acepto', doy consentimiento para uso de datos."
+      consent-storage-key="vapi_widget_consent"
+    ></vapi-widget>
+    <script src="https://unpkg.com/@vapi-ai/client-sdk-react/dist/embed/widget.umd.js" async></script>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
