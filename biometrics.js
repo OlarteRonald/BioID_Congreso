@@ -1,20 +1,32 @@
-const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
 
 export const BiometricsFlow = {
     modelsLoaded: false,
+    modelsLoading: null,
 
     async loadModels() {
-        if (this.modelsLoaded) return;
-        try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-            this.modelsLoaded = true;
-            console.log("Face-API models loaded successfully");
-        } catch (err) {
-            console.error("Error loading face-api models:", err);
-            throw err;
-        }
+        if (this.modelsLoaded) return true;
+        if (this.modelsLoading) return this.modelsLoading;
+
+        this.modelsLoading = (async () => {
+            try {
+                console.log("Descargando modelos de reconocimiento facial...");
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                console.log("Modelo 1/3 cargado: Detector facial");
+                await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+                console.log("Modelo 2/3 cargado: Landmarks faciales");
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                console.log("Modelo 3/3 cargado: Red de reconocimiento");
+                this.modelsLoaded = true;
+                return true;
+            } catch (err) {
+                console.error("Error cargando modelos face-api:", err);
+                this.modelsLoading = null;
+                throw err;
+            }
+        })();
+
+        return this.modelsLoading;
     },
 
     async startCamera(videoElement) {
@@ -25,9 +37,6 @@ export const BiometricsFlow = {
             videoElement.onloadedmetadata = () => {
                 videoElement.play().catch(e => console.error("Error reproduciendo el feed de la cámara:", e));
             };
-            
-            // Cargar modelos de reconocimiento facial en paralelo
-            this.loadModels().catch(e => console.warn("Modelos faciales cargando en segundo plano...", e));
 
             return stream;
         } catch (err) {
@@ -46,21 +55,28 @@ export const BiometricsFlow = {
     },
 
     async getFaceDescriptor(canvasElement) {
+        // Cargar modelos con timeout de 30s
+        const modelPromise = this.loadModels();
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Tiempo agotado descargando modelos de IA. Verifique su conexión a internet.")), 30000)
+        );
+
+        await Promise.race([modelPromise, timeoutPromise]);
+
         if (!this.modelsLoaded) {
-            await this.loadModels();
+            throw new Error("Los modelos de IA no se pudieron cargar.");
         }
 
         const detection = await faceapi
-            .detectSingleFace(canvasElement, new faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks()
+            .detectSingleFace(canvasElement, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 }))
+            .withFaceLandmarks(true) // true = usar modelo tiny
             .withFaceDescriptor();
 
         if (!detection) return null;
-        return Array.from(detection.descriptor); // Float32Array → Array normal para JSON
+        return Array.from(detection.descriptor);
     },
 
     compareFaces(descriptor1, descriptor2, threshold = 0.55) {
-        // Distancia euclidiana entre los dos vectores de 128 dimensiones
         const distance = faceapi.euclideanDistance(
             new Float32Array(descriptor1),
             new Float32Array(descriptor2)
