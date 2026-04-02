@@ -3,6 +3,12 @@ export const BiometricsFlow = {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             videoElement.srcObject = stream;
+            
+            // Asegurarnos de que el feed corra en cuanto la metadata esté lista
+            videoElement.onloadedmetadata = () => {
+                videoElement.play().catch(e => console.error("Error reproduciendo el feed de la cámara:", e));
+            };
+            
             return stream;
         } catch (err) {
             console.error("Error al acceder a la cámara:", err);
