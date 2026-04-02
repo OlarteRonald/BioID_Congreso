@@ -100,8 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             } catch (e) {
                 console.error("Error cargando modelo de voz en logout:", e);
-                alert("Error técnico con micrófono. Revise permisos.");
                 modalLogout.classList.add('hidden');
+                
+                alert("Protocolo estricto: El hardware de su micrófono no pudo inicializarse (posible conflicto con otras pestañas o bloqueos del navegador). No se puede completar el Cierre de Sesión sin validación vocal obligatoria. Por favor presione Permitir Acceso al micrófono o reinicie el navegador.\n\nDetalle técnico: " + (e.message || "Permiso Denegado"));
             }
         });
     }
