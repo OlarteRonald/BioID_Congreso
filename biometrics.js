@@ -1,33 +1,4 @@
-const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
-
 export const BiometricsFlow = {
-    modelsLoaded: false,
-    modelsLoading: null,
-
-    async loadModels() {
-        if (this.modelsLoaded) return true;
-        if (this.modelsLoading) return this.modelsLoading;
-
-        this.modelsLoading = (async () => {
-            try {
-                console.log("Descargando modelos de reconocimiento facial...");
-                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-                console.log("Modelo 1/3 cargado: Detector facial");
-                await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
-                console.log("Modelo 2/3 cargado: Landmarks faciales");
-                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-                console.log("Modelo 3/3 cargado: Red de reconocimiento");
-                this.modelsLoaded = true;
-                return true;
-            } catch (err) {
-                console.error("Error cargando modelos face-api:", err);
-                this.modelsLoading = null;
-                throw err;
-            }
-        })();
-
-        return this.modelsLoading;
-    },
 
     async startCamera(videoElement) {
         try {
@@ -35,7 +6,7 @@ export const BiometricsFlow = {
             videoElement.srcObject = stream;
             
             videoElement.onloadedmetadata = () => {
-                videoElement.play().catch(e => console.error("Error reproduciendo el feed de la cámara:", e));
+                videoElement.play().catch(e => console.error("Error reproduciendo el feed:", e));
             };
 
             return stream;
@@ -54,42 +25,82 @@ export const BiometricsFlow = {
         return canvasElement.toDataURL('image/jpeg', 0.8);
     },
 
-    async getFaceDescriptor(canvasElement) {
-        // Cargar modelos con timeout de 30s
-        const modelPromise = this.loadModels();
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Tiempo agotado descargando modelos de IA. Verifique su conexión a internet.")), 30000)
-        );
+    /**
+     * Genera una firma biométrica facial del canvas.
+     * Recorta la zona central del rostro, reduce a 64x64 en escala de grises,
+     * y normaliza los valores para compensar cambios de iluminación.
+     * Retorna un array de 4096 valores (64x64) entre 0-255.
+     */
+    getFaceSignature(canvasElement) {
+        const size = 64;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+        const ctx = tempCanvas.getContext('2d');
 
-        await Promise.race([modelPromise, timeoutPromise]);
+        // Recortar la parte central del frame (donde se espera el rostro)
+        const srcW = canvasElement.width;
+        const srcH = canvasElement.height;
+        const cropW = srcW * 0.5;  // 50% ancho central
+        const cropH = srcH * 0.7;  // 70% alto central
+        const sx = (srcW - cropW) / 2;
+        const sy = (srcH - cropH) * 0.3; // Un poco más arriba para captar la cara
 
-        if (!this.modelsLoaded) {
-            throw new Error("Los modelos de IA no se pudieron cargar.");
+        ctx.drawImage(canvasElement, sx, sy, cropW, cropH, 0, 0, size, size);
+
+        const imageData = ctx.getImageData(0, 0, size, size);
+        const pixels = imageData.data;
+        const grayscale = [];
+
+        for (let i = 0; i < pixels.length; i += 4) {
+            grayscale.push(
+                Math.round(pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114)
+            );
         }
 
-        const detection = await faceapi
-            .detectSingleFace(canvasElement, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 }))
-            .withFaceLandmarks(true) // true = usar modelo tiny
-            .withFaceDescriptor();
-
-        if (!detection) return null;
-        return Array.from(detection.descriptor);
+        // Normalizar para compensar diferencias de brillo/contraste
+        let min = 255, max = 0;
+        for (const v of grayscale) {
+            if (v < min) min = v;
+            if (v > max) max = v;
+        }
+        const range = max - min || 1;
+        return grayscale.map(v => Math.round((v - min) / range * 255));
     },
 
-    compareFaces(descriptor1, descriptor2, threshold = 0.55) {
-        const distance = faceapi.euclideanDistance(
-            new Float32Array(descriptor1),
-            new Float32Array(descriptor2)
+    /**
+     * Compara dos firmas faciales usando el Coeficiente de Correlación de Pearson.
+     * Este método es robusto ante cambios de iluminación y contraste.
+     * Retorna: { match: bool, confidence: string (%), distance: number }
+     */
+    compareFaces(sig1, sig2, threshold = 0.52) {
+        const n = sig1.length;
+        let sum1 = 0, sum2 = 0, sum1Sq = 0, sum2Sq = 0, pSum = 0;
+
+        for (let i = 0; i < n; i++) {
+            sum1 += sig1[i];
+            sum2 += sig2[i];
+            sum1Sq += sig1[i] * sig1[i];
+            sum2Sq += sig2[i] * sig2[i];
+            pSum += sig1[i] * sig2[i];
+        }
+
+        const num = pSum - (sum1 * sum2 / n);
+        const den = Math.sqrt(
+            (sum1Sq - sum1 * sum1 / n) * (sum2Sq - sum2 * sum2 / n)
         );
+
+        const correlation = den === 0 ? 0 : num / den;
+
         return {
-            match: distance < threshold,
-            distance: distance,
-            confidence: Math.max(0, (1 - distance) * 100).toFixed(1)
+            match: correlation > threshold,
+            distance: 1 - correlation,
+            confidence: Math.max(0, correlation * 100).toFixed(1)
         };
     },
 
     stopCamera(stream) {
-        if(stream) {
+        if (stream) {
             stream.getTracks().forEach(track => track.stop());
         }
     }

@@ -89,26 +89,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnCapture.addEventListener('click', async () => {
         userData.foto_biometrica = BiometricsFlow.capturePhoto(video, canvas);
-        btnCapture.textContent = "Cargando IA facial...";
+        btnCapture.textContent = "Analizando rostro...";
         btnCapture.disabled = true;
 
         try {
-            const descriptor = await BiometricsFlow.getFaceDescriptor(canvas);
-            if (!descriptor) {
-                alert("No se detectó un rostro válido. Asegúrese de estar bien iluminado y mirando directamente a la cámara.");
+            const signature = BiometricsFlow.getFaceSignature(canvas);
+            if (!signature || signature.length === 0) {
+                alert("No se pudo procesar la imagen. Intente de nuevo.");
                 btnCapture.textContent = "Capturar Rostro";
                 btnCapture.disabled = false;
                 return;
             }
 
-            userData.face_descriptor = JSON.stringify(descriptor);
+            userData.face_descriptor = JSON.stringify(signature);
             btnCapture.textContent = "✅ Rostro Registrado";
             btnCapture.classList.replace('btn-outline', 'btn-solid');
             btnCapture.style.backgroundColor = "green";
             btnFinish.classList.remove('hidden');
         } catch(e) {
             console.error("Error en análisis facial:", e);
-            alert("Error al analizar el rostro: " + e.message + "\n\nIntente recargar la página.");
+            alert("Error al analizar el rostro: " + e.message);
             btnCapture.textContent = "Capturar Rostro";
             btnCapture.disabled = false;
         }
@@ -178,30 +178,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login Paso 2: Biometría
     btnLoginCapture.addEventListener('click', async () => {
         BiometricsFlow.capturePhoto(logVideo, logCanvas);
-        btnLoginCapture.textContent = "Cargando IA facial...";
+        btnLoginCapture.textContent = "Comparando rostro...";
         btnLoginCapture.disabled = true;
 
         try {
-            // Extraer descriptor del rostro capturado ahora
-            const liveDescriptor = await BiometricsFlow.getFaceDescriptor(logCanvas);
-            if (!liveDescriptor) {
-                alert("No se detectó un rostro. Asegúrese de estar frente a la cámara con buena iluminación.");
+            // Generar firma del rostro capturado en vivo
+            const liveSignature = BiometricsFlow.getFaceSignature(logCanvas);
+            if (!liveSignature || liveSignature.length === 0) {
+                alert("No se pudo procesar la imagen. Intente de nuevo.");
                 btnLoginCapture.textContent = "Verificar Rostro";
                 btnLoginCapture.disabled = false;
                 return;
             }
 
-            // Obtener descriptor almacenado del usuario
+            // Obtener firma almacenada del usuario
             const storedRaw = loginData.user.face_descriptor;
             if (!storedRaw) {
-                alert("Este usuario no tiene un registro biométrico facial. Debe registrarse nuevamente.");
+                alert("Este usuario no tiene registro biométrico facial. Debe registrarse nuevamente.");
                 btnLoginCapture.textContent = "Verificar Rostro";
                 btnLoginCapture.disabled = false;
                 return;
             }
 
-            const storedDescriptor = JSON.parse(storedRaw);
-            const result = BiometricsFlow.compareFaces(liveDescriptor, storedDescriptor);
+            const storedSignature = JSON.parse(storedRaw);
+            const result = BiometricsFlow.compareFaces(liveSignature, storedSignature);
 
             if (result.match) {
                 btnLoginCapture.textContent = `✅ Identidad Confirmada (${result.confidence}%)`;
@@ -209,13 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnLoginCapture.style.backgroundColor = "green";
                 btnLoginNext.classList.remove('hidden');
             } else {
-                alert(`❌ Rostro NO coincide.\nSimilitud: ${result.confidence}%\nSe requiere una coincidencia superior al 45%.\n\nIntente de nuevo con mejor iluminación o la misma posición del registro.`);
+                alert(`❌ Rostro NO coincide.\nSimilitud: ${result.confidence}%\nSe requiere mínimo 52%.\n\nIntente con la misma iluminación y posición del registro.`);
                 btnLoginCapture.textContent = "Verificar Rostro";
                 btnLoginCapture.disabled = false;
             }
         } catch(e) {
             console.error("Error en verificación facial:", e);
-            alert("Error en la verificación facial: " + e.message + "\n\nIntente recargar la página.");
+            alert("Error en la verificación: " + e.message);
             btnLoginCapture.textContent = "Verificar Rostro";
             btnLoginCapture.disabled = false;
         }
