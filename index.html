@@ -129,8 +129,21 @@
                 <div class="modal-body hidden" id="login-step-3">
                     <h3 style="margin-bottom: 1rem; color: var(--color-white)">Verificación por Voz</h3>
                     <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;" id="voice-status">Diga la palabra de seguridad (Clase: "bolivar") para autorizar el acceso.</p>
-                    <div style="text-align:center; padding: 20px 0;">
-                        <div style="font-size: 3rem;" class="pulse-animation">🎙️</div>
+                    
+                    <div style="background:#111; padding:30px 20px; border-radius:10px; text-align:center;">
+                        <div style="display:flex; justify-content:center; margin-bottom:15px;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="login-mic-icon">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="22"></line>
+                                <line x1="8" y1="22" x2="16" y2="22"></line>
+                            </svg>
+                        </div>
+                        <p class="hero-subtitle" style="font-weight:600; color:#fff;">Pronuncie "Bolívar"</p>
+                        
+                        <div style="width:100%; background:#222; height:12px; border-radius:6px; overflow:hidden; margin-top:20px;">
+                            <div id="login-voice-intensity" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.1s;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
