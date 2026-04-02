@@ -22,7 +22,8 @@ export const SupabaseService = {
                 correo: userData.correo,
                 usuario: userData.usuario,
                 password: userData.password,
-                foto_biometrica: userData.foto_biometrica
+                foto_biometrica: userData.foto_biometrica,
+                face_descriptor: userData.face_descriptor
             });
 
         return { data, error };
