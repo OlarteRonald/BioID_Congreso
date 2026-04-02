@@ -58,10 +58,24 @@
         </div>
     </main>
 
-    <!-- Botón Flotante Micrófono -->
-    <button id="btn-floating-mic" class="floating-mic-btn" title="Activar micrófono">
-        🎙️
-    </button>
+    <!-- Modal para Cierre de Sesión por Voz -->
+    <div id="logout-modal" class="modal hidden">
+        <div class="modal-content fade-in" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; position: relative;">
+                <h3>Cierre de Seguridad</h3>
+                <span id="close-logout-modal" style="position:absolute; right:15px; top: 15px; cursor:pointer; font-size:1.5rem;">❌</span>
+            </div>
+            
+            <div style="background:#111; padding:30px 20px; border-radius:10px; margin-top:20px;">
+                <span style="font-size:4rem; display:block; margin-bottom:10px; color: var(--color-gold);">🎙️</span>
+                <p class="hero-subtitle">Confirme identificador de voz</p>
+                <div style="width:100%; background:#222; height:12px; border-radius:6px; overflow:hidden; margin-top:30px;">
+                    <div id="logout-voice-intensity" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.1s;"></div>
+                </div>
+            </div>
+            <p style="color:#aaa; font-size:0.8rem; margin-top:15px;">Pronuncie la clave para blindar el cierre maestro.</p>
+        </div>
+    </div>
 
     <!-- VAPI Widget -->
     <vapi-widget

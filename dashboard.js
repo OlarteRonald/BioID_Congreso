@@ -74,30 +74,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = "index.html";
     };
 
-    // Logout Click
-    document.getElementById('btn-logout').addEventListener('click', logoutSession);
+    // 6. Botón de Logout Maestro abre el modal
+    const btnLogout = document.getElementById('btn-logout');
+    const modalLogout = document.getElementById('logout-modal');
+    const closeLogout = document.getElementById('close-logout-modal');
 
-    // 6. Botón Flotante para Comandos de Voz ("Caldas")
-    const btnFloatingMic = document.getElementById('btn-floating-mic');
-    if (btnFloatingMic) {
-        btnFloatingMic.addEventListener('click', async () => {
-            btnFloatingMic.classList.add('listening');
+    if (btnLogout && modalLogout) {
+        btnLogout.addEventListener('click', async () => {
+            modalLogout.classList.remove('hidden');
             
             try {
                 await VoiceFlow.initModel("https://teachablemachine.withgoogle.com/models/rGMICgfNQ/");
                 
+                // Efecto de barra para intensidad en modal de logout
+                VoiceFlow.setOnListen((confidence) => {
+                    const intensBar = document.getElementById('logout-voice-intensity');
+                    if(intensBar) intensBar.style.width = Math.min(100, (confidence * 100 * 1.5)) + '%';
+                });
+
                 VoiceFlow.listenFor("caldas", async () => {
                     VoiceFlow.stopListening();
-                    btnFloatingMic.classList.remove('listening');
-                    btnFloatingMic.textContent = "✅";
-                    
-                    alert("Comando detectado ('Caldas'). Finalizando sesión segura y guardando datos en la BD.");
+                    modalLogout.classList.add('hidden');
+                    alert("Cierre de sesión verificado ('Caldas'). Guardando auditoría.");
                     await logoutSession();
                 });
             } catch (e) {
-                console.error("Error cargando modelo de voz:", e);
-                btnFloatingMic.classList.remove('listening');
+                console.error("Error cargando modelo de voz en logout:", e);
+                alert("Error técnico con micrófono. Revise permisos.");
+                modalLogout.classList.add('hidden');
             }
+        });
+    }
+
+    if(closeLogout && modalLogout) {
+        closeLogout.addEventListener('click', () => {
+            modalLogout.classList.add('hidden');
+            VoiceFlow.stopListening();
         });
     }
 });

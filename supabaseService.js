@@ -64,5 +64,23 @@ export const SupabaseService = {
             })
             .eq('id', sessionId);
         return { data, error };
+    },
+
+    async getAllUsers() {
+        this.init();
+        const { data, error } = await this.client
+            .from('usuarios')
+            .select('*')
+            .order('fecha_registro', { ascending: false });
+        return { data, error };
+    },
+
+    async getAllSessions() {
+        this.init();
+        const { data, error } = await this.client
+            .from('sesiones')
+            .select('*, usuarios(nombre)')
+            .order('fecha_inicio', { ascending: false });
+        return { data, error };
     }
 };
