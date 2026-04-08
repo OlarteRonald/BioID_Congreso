@@ -73,7 +73,7 @@ export const BiometricsFlow = {
      * Este método es robusto ante cambios de iluminación y contraste.
      * Retorna: { match: bool, confidence: string (%), distance: number }
      */
-    compareFaces(sig1, sig2, threshold = 0.52) {
+    compareFaces(sig1, sig2, threshold = 0.40) {
         const n = sig1.length;
         let sum1 = 0, sum2 = 0, sum1Sq = 0, sum2Sq = 0, pSum = 0;
 

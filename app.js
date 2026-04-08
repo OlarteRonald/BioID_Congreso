@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnLoginCapture.style.backgroundColor = "green";
                 btnLoginNext.classList.remove('hidden');
             } else {
-                alert(`❌ Rostro NO coincide.\nSimilitud: ${result.confidence}%\nSe requiere mínimo 52%.\n\nIntente con la misma iluminación y posición del registro.`);
+                alert(`❌ Rostro NO coincide.\nSimilitud: ${result.confidence}%\nSe requiere mínimo 40%.\n\nIntente con la misma iluminación y posición del registro.`);
                 btnLoginCapture.textContent = "Verificar Rostro";
                 btnLoginCapture.disabled = false;
             }
